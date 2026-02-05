@@ -105,9 +105,9 @@ export function EntryForm({ type, entries, onChange }) {
     <div className="space-y-4">
       <div className="space-y-4">
         {entries.map((item, index) => (
-          <Card key={index}>
+          <Card key={index} className="bg-slate-900/50 border-slate-600">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
+              <CardTitle className="text-sm font-medium text-slate-200">
                 {item.title} @ {item.organization}
               </CardTitle>
               <Button
@@ -115,17 +115,18 @@ export function EntryForm({ type, entries, onChange }) {
                 size="icon"
                 type="button"
                 onClick={() => handleDelete(index)}
+                className="border-slate-600 text-slate-300 hover:bg-slate-800"
               >
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-slate-400">
                 {item.current
                   ? `${item.startDate} - Present`
                   : `${item.startDate} - ${item.endDate}`}
               </p>
-              <p className="mt-2 text-sm whitespace-pre-wrap">
+              <p className="mt-2 text-sm whitespace-pre-wrap text-slate-300">
                 {item.description}
               </p>
             </CardContent>
@@ -134,9 +135,9 @@ export function EntryForm({ type, entries, onChange }) {
       </div>
 
       {isAdding && (
-        <Card>
+        <Card className="bg-slate-900/50 border-slate-600">
           <CardHeader>
-            <CardTitle>Add {type}</CardTitle>
+            <CardTitle className="text-slate-200">Add {type}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -145,9 +146,10 @@ export function EntryForm({ type, entries, onChange }) {
                   placeholder="Title/Position"
                   {...register("title")}
                   error={errors.title}
+                  className="bg-slate-900 border-slate-600 text-slate-200"
                 />
                 {errors.title && (
-                  <p className="text-sm text-red-500">{errors.title.message}</p>
+                  <p className="text-sm text-red-400">{errors.title.message}</p>
                 )}
               </div>
               <div className="space-y-2">
@@ -155,9 +157,10 @@ export function EntryForm({ type, entries, onChange }) {
                   placeholder="Organization/Company"
                   {...register("organization")}
                   error={errors.organization}
+                  className="bg-slate-900 border-slate-600 text-slate-200"
                 />
                 {errors.organization && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-red-400">
                     {errors.organization.message}
                   </p>
                 )}
@@ -170,9 +173,10 @@ export function EntryForm({ type, entries, onChange }) {
                   type="month"
                   {...register("startDate")}
                   error={errors.startDate}
+                  className="bg-slate-900 border-slate-600 text-slate-200"
                 />
                 {errors.startDate && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-red-400">
                     {errors.startDate.message}
                   </p>
                 )}
@@ -183,9 +187,10 @@ export function EntryForm({ type, entries, onChange }) {
                   {...register("endDate")}
                   disabled={current}
                   error={errors.endDate}
+                  className="bg-slate-900 border-slate-600 text-slate-200"
                 />
                 {errors.endDate && (
-                  <p className="text-sm text-red-500">
+                  <p className="text-sm text-red-400">
                     {errors.endDate.message}
                   </p>
                 )}
@@ -203,19 +208,20 @@ export function EntryForm({ type, entries, onChange }) {
                     setValue("endDate", "");
                   }
                 }}
+                className="bg-slate-900 border-slate-600"
               />
-              <label htmlFor="current">Current {type}</label>
+              <label htmlFor="current" className="text-slate-200">Current {type}</label>
             </div>
 
             <div className="space-y-2">
               <Textarea
                 placeholder={`Description of your ${type.toLowerCase()}`}
-                className="h-32"
+                className="h-32 bg-slate-900 border-slate-600 text-slate-200"
                 {...register("description")}
                 error={errors.description}
               />
               {errors.description && (
-                <p className="text-sm text-red-500">
+                <p className="text-sm text-red-400">
                   {errors.description.message}
                 </p>
               )}
@@ -226,6 +232,7 @@ export function EntryForm({ type, entries, onChange }) {
               size="sm"
               onClick={handleImproveDescription}
               disabled={isImproving || !watch("description")}
+              className="text-blue-400 hover:text-blue-300 hover:bg-slate-800"
             >
               {isImproving ? (
                 <>
@@ -248,10 +255,15 @@ export function EntryForm({ type, entries, onChange }) {
                 reset();
                 setIsAdding(false);
               }}
+              className="border-slate-600 text-slate-200 hover:bg-slate-800"
             >
               Cancel
             </Button>
-            <Button type="button" onClick={handleAdd}>
+            <Button 
+              type="button" 
+              onClick={handleAdd}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
               <PlusCircle className="h-4 w-4 mr-2" />
               Add Entry
             </Button>
@@ -261,7 +273,7 @@ export function EntryForm({ type, entries, onChange }) {
 
       {!isAdding && (
         <Button
-          className="w-full"
+          className="w-full border-slate-600 text-slate-200 hover:bg-slate-800"
           variant="outline"
           onClick={() => setIsAdding(true)}
         >

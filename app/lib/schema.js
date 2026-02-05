@@ -34,6 +34,67 @@ export const contactSchema = z.object({
   twitter: z.string().optional(),
 });
 
+// Experience entry schema
+export const experienceSchema = z
+  .object({
+    title: z.string().min(1, "Job title is required"),
+    organization: z.string().min(1, "Company name is required"),
+    location: z.string().optional(),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().optional(),
+    description: z.string().min(1, "Description is required"),
+    current: z.boolean().default(false),
+  })
+  .refine(
+    (data) => {
+      if (!data.current && !data.endDate) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "End date is required unless this is your current position",
+      path: ["endDate"],
+    }
+  );
+
+// Education entry schema
+export const educationSchema = z
+  .object({
+    degree: z.string().min(1, "Degree/Certificate is required"),
+    institution: z.string().min(1, "Institution name is required"),
+    location: z.string().optional(),
+    startDate: z.string().min(1, "Start date is required"),
+    endDate: z.string().optional(),
+    grade: z.string().optional(),
+    description: z.string().optional(),
+    current: z.boolean().default(false),
+  })
+  .refine(
+    (data) => {
+      if (!data.current && !data.endDate) {
+        return false;
+      }
+      return true;
+    },
+    {
+      message: "End date is required unless you are currently studying",
+      path: ["endDate"],
+    }
+  );
+
+// Project entry schema
+export const projectSchema = z.object({
+  name: z.string().min(1, "Project name is required"),
+  description: z.string().min(1, "Description is required"),
+  technologies: z.string().optional(),
+  githubUrl: z.string().optional(),
+  liveUrl: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+});
+
+// Legacy entry schema for backward compatibility
 export const entrySchema = z
   .object({
     title: z.string().min(1, "Title is required"),
@@ -60,9 +121,9 @@ export const resumeSchema = z.object({
   contactInfo: contactSchema,
   summary: z.string().min(1, "Professional summary is required"),
   skills: z.string().min(1, "Skills are required"),
-  experience: z.array(entrySchema),
-  education: z.array(entrySchema),
-  projects: z.array(entrySchema),
+  experience: z.array(experienceSchema).optional(),
+  education: z.array(educationSchema).optional(),
+  projects: z.array(projectSchema).optional(),
 });
 
 export const coverLetterSchema = z.object({

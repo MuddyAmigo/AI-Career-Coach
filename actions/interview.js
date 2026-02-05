@@ -5,7 +5,7 @@ import { auth } from "@clerk/nextjs/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
 export async function generateQuiz() {
   const { userId } = await auth();
@@ -20,40 +20,64 @@ export async function generateQuiz() {
   });
 
   if (!user) throw new Error("User not found");
+  
+  if (!user.industry) {
+    throw new Error("Please complete your profile onboarding first to generate quiz questions");
+  }
 
   const prompt = `
-    Generate 10 technical interview questions for a ${
-      user.industry
-    } professional${
-    user.skills?.length ? ` with expertise in ${user.skills.join(", ")}` : ""
+    Generate 10 technical interview questions for a ${user.industry} professional${
+    user.skills?.length ? ` with expertise in ${user.skills}` : ""
   }.
     
     Each question should be multiple choice with 4 options.
     
-    Return the response in this JSON format only, no additional text:
+    IMPORTANT: Return ONLY valid JSON in this exact format, no additional text, markdown, or explanation:
     {
       "questions": [
         {
-          "question": "string",
-          "options": ["string", "string", "string", "string"],
-          "correctAnswer": "string",
-          "explanation": "string"
+          "question": "What is the purpose of X?",
+          "options": ["Option A", "Option B", "Option C", "Option D"],
+          "correctAnswer": "Option A",
+          "explanation": "Brief explanation of why this is correct"
         }
       ]
     }
+    
+    Generate exactly 10 questions.
   `;
 
   try {
     const result = await model.generateContent(prompt);
     const response = result.response;
     const text = response.text();
+    
+    console.log("Raw AI response:", text);
+    
     const cleanedText = text.replace(/```(?:json)?\n?/g, "").trim();
+    
+    console.log("Cleaned text:", cleanedText);
+    
     const quiz = JSON.parse(cleanedText);
+
+    if (!quiz.questions || !Array.isArray(quiz.questions)) {
+      throw new Error("Invalid quiz format: missing questions array");
+    }
+    
+    if (quiz.questions.length === 0) {
+      throw new Error("No questions generated. Please try again.");
+    }
+    
+    console.log(`Generated ${quiz.questions.length} questions`);
 
     return quiz.questions;
   } catch (error) {
     console.error("Error generating quiz:", error);
-    throw new Error("Failed to generate quiz questions");
+    console.error("Error details:", error.message);
+    if (error instanceof SyntaxError) {
+      throw new Error("Failed to parse AI response. Please try again.");
+    }
+    throw new Error("Failed to generate quiz questions: " + error.message);
   }
 }
 
@@ -116,7 +140,7 @@ export async function saveQuizResult(questions, answers, score) {
         userId: user.id,
         quizScore: score,
         questions: questionResults,
-        category: "Technical",
+        category: user.industry,
         improvementTip,
       },
     });
